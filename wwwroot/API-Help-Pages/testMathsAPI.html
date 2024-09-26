@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MATH API TEST</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<body>
+<form id="testForm">
+    <fieldset>
+        <input id="hostURL" type="text"><span>/api/maths</span>
+
+        <input type="submit" value="Démarrer le test">
+        <input type="button" value="Aide">
+    </fieldset>
+</form>
+<br>
+<fieldset id="testResults">
+
+</fieldset>
+</body>
+<script>
+    let TOTAL_TEST = 0;
+    let TOTAL_SUCCESS = 0;
+    let CATEGORY_TEST = 0;
+    let CATEGORY_SUCCESS = 0;
+
+    function testAPI(URL, queryString, checkResult) {
+        return $.ajax({
+            url: URL + queryString,
+
+            success: function (result) {
+                TOTAL_TEST++;
+                CATEGORY_TEST++;
+
+                let success;
+
+                if ({}.toString.call(checkResult) === '[object Function]')
+                    success = checkResult(result);
+                else
+                    success = result.value === checkResult;
+
+                if (success) {
+                    TOTAL_SUCCESS++;
+                    CATEGORY_SUCCESS++;
+                }
+
+                addResult(queryString, result, success);
+            }
+        });
+    }
+
+    // --- RESULTS ---
+    function addNewCategory(text) {
+
+        if (CATEGORY_TEST > 0)
+            endCategory(false);
+
+        CATEGORY_TEST = 0;
+        CATEGORY_SUCCESS = 0;
+        $("#testResults").append(`<h3>${text}</h3>`);
+    }
+
+    function addResult(queryString, apiResult, succeed) {
+        let text = succeed
+            ? "<b style='color: green'>OK</b> ----> "
+            : "<b style='color: red'>ERROR</b> -> ";
+
+        text += JSON.stringify(apiResult, null, 2);
+
+        $("#testResults").append(`<span title="${queryString}">${text}</span><br>`);
+    }
+
+    function clearResults() {
+        TOTAL_TEST = 0;
+        TOTAL_SUCCESS = 0;
+
+        CATEGORY_TEST = 0;
+        CATEGORY_SUCCESS = 0;
+
+        $("#testResults").empty();
+    }
+    function endCategory(final) {
+
+        if (final)
+        {
+            $("#testResults").prepend(`<h2>Total Tests succeed: ${TOTAL_SUCCESS} / ${TOTAL_TEST}</h2>`);
+        }
+        else
+        {
+            $("#testResults").append(`<h5>Tests succeed: ${CATEGORY_SUCCESS} / ${CATEGORY_TEST}</h5>`);
+        }
+    }
+
+    // --- CHECK RESULTS ---
+    function expectError(result) {
+        return result.error !== undefined;
+    }
+</script>
+<script>
+    async function runTests(URL) {
+        clearResults();
+
+        // --- ADDITION ---
+        addNewCategory("ADDITION");
+        await testAPI(URL, "?op=+", expectError);
+        await testAPI(URL, "?op=+&x=1", expectError);
+        await testAPI(URL, "?op=+&x=ABC", expectError);
+        await testAPI(URL, "?op=+&y=1", expectError);
+        await testAPI(URL, "?op=+&x=1&y=ABC", expectError);
+        await testAPI(URL, "?op=+&x=1&y=1", 2);
+        await testAPI(URL, "?op=+&x=1&y=1&z=2", expectError);
+        await testAPI(URL, "?op=+&x=1&y=77", 78);
+        await testAPI(URL, "?op=+&x=-1&y=2", 1);
+        await testAPI(URL, "?op=+&x=-1&y=-100", -101);
+
+        // --- SUBTRACTION ---
+        addNewCategory("SUBTRACTION");
+        await testAPI(URL, "?op=-", expectError);
+        await testAPI(URL, "?op=-&x=1", expectError);
+        await testAPI(URL, "?op=-&x=ABC", expectError);
+        await testAPI(URL, "?op=-&y=1", expectError);
+        await testAPI(URL, "?op=-&x=1&y=ABC", expectError);
+        await testAPI(URL, "?op=-&x=1&y=1", 0);
+        await testAPI(URL, "?op=-&x=1&y=1&z=2", expectError);
+        await testAPI(URL, "?op=-&x=1&y=77", -76);
+        await testAPI(URL, "?op=-&x=-1&y=2", -3);
+        await testAPI(URL, "?op=-&x=-1&y=-100", 99);
+
+        // --- MULTIPLICATION ---
+        addNewCategory("MULTIPLICATION");
+        await testAPI(URL, "?op=*", expectError);
+        await testAPI(URL, "?op=*&x=1", expectError);
+        await testAPI(URL, "?op=*&x=ABC", expectError);
+        await testAPI(URL, "?op=*&y=1", expectError);
+        await testAPI(URL, "?op=*&x=1&y=ABC", expectError);
+        await testAPI(URL, "?op=*&x=1&y=1", 1);
+        await testAPI(URL, "?op=*&x=1&y=1&z=2", expectError);
+        await testAPI(URL, "?op=*&x=1&y=77", 77);
+        await testAPI(URL, "?op=*&x=-1&y=2", -2);
+        await testAPI(URL, "?op=*&x=-1&y=-100", 100);
+
+        // --- DIVISION ---
+        addNewCategory("DIVISION");
+        await testAPI(URL, "?op=/", expectError);
+        await testAPI(URL, "?op=/&x=1", expectError);
+        await testAPI(URL, "?op=/&x=ABC", expectError);
+        await testAPI(URL, "?op=/&y=1", expectError);
+        await testAPI(URL, "?op=/&x=1&y=ABC", expectError);
+        await testAPI(URL, "?op=/&x=1&y=1", 1);
+        await testAPI(URL, "?op=/&x=1&y=1&z=2", expectError);
+        await testAPI(URL, "?op=/&x=1&y=77", 1 / 77);
+        await testAPI(URL, "?op=/&x=-1&y=2", -0.5);
+        await testAPI(URL, "?op=/&x=-1&y=-100", 0.01);
+
+        // --- MODULO ---
+        addNewCategory("MODULO");
+        await testAPI(URL, "?op=%", expectError);
+        await testAPI(URL, "?op=%&x=1", expectError);
+        await testAPI(URL, "?op=%&x=ABC", expectError);
+        await testAPI(URL, "?op=%&y=1", expectError);
+        await testAPI(URL, "?op=%&x=1&y=ABC", expectError);
+        await testAPI(URL, "?op=%&x=1&y=1", 0);
+        await testAPI(URL, "?op=%&x=1&y=1&z=2", expectError);
+        await testAPI(URL, "?op=%&x=1&y=77", 1);
+        await testAPI(URL, "?op=%&x=-1&y=2", -1);
+        await testAPI(URL, "?op=%&x=-1&y=-100", -1);
+        await testAPI(URL, "?op=%&x=100&y=10", 0);
+        await testAPI(URL, "?op=%&x=100&y=9", 1);
+
+        // --- FACTOR ---
+        addNewCategory("FACTOR");
+        await testAPI(URL, "?op=!", expectError);
+        await testAPI(URL, "?op=!&n=ABC", expectError);
+        await testAPI(URL, "?op=!&n=10", 3628800);
+        await testAPI(URL, "?op=!&n=1&y=1", expectError);
+        await testAPI(URL, "?op=!&n=2", 2);
+        await testAPI(URL, "?op=!&n=-4", expectError);
+
+        // --- PRIME ---
+        addNewCategory("PRIME");
+        await testAPI(URL, "?op=p", expectError);
+        await testAPI(URL, "?op=p&n=ABC", expectError);
+        await testAPI(URL, "?op=p&n=10", false);
+        await testAPI(URL, "?op=p&n=1&y=1", expectError);
+        await testAPI(URL, "?op=p&n=2", true);
+        await testAPI(URL, "?op=p&n=-4", false);
+        await testAPI(URL, "?op=p&n=0", false);
+        await testAPI(URL, "?op=p&n=1", false);
+
+        // --- FIND PRIME ---
+        addNewCategory("FIND PRIME");
+        await testAPI(URL, "?op=np", expectError);
+        await testAPI(URL, "?op=np&n=ABC", expectError);
+        await testAPI(URL, "?op=np&n=10", 29);
+        await testAPI(URL, "?op=np&n=1&y=1", expectError);
+        await testAPI(URL, "?op=np&n=2", 3);
+        await testAPI(URL, "?op=np&n=-4", expectError);
+        await testAPI(URL, "?op=np&n=0", 0);
+        await testAPI(URL, "?op=np&n=1", 2);
+
+        endCategory(false);
+        endCategory(true);
+    }
+
+    $("#testForm").on("submit", function (event) {
+        event.preventDefault();
+        let url = $("#hostURL").val();
+
+        runTests(url + "/api/maths");
+    });
+    $("#hostURL").attr("value", window.location.protocol + "//" + window.location.host);
+</script>
+</html>
