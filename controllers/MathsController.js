@@ -16,58 +16,54 @@ export default class MathsController extends Controller {
             return;
         }
 
-        const operator = request.params['op'];
+        let response = undefined;
 
-        // If operator invalid
-        if (operator === undefined) {
-            this.setResponse({
-                error: "'op' parameter is missing!"
-            });
-            return;
+        switch (request.params['op']) {
+            // Invalid operator
+            case undefined:
+                response = {
+                    error: "'op' parameter is missing!"
+                };
+                break;
+            // Addition
+            case "+":
+            case " ":
+                response = this.getAddition(request);
+                break;
+            // Subtraction
+            case "-":
+                response = this.getSubtraction(request);
+                break;
+            // Multiplication
+            case "*":
+                response = this.getMultiplication(request);
+                break;
+            // Division
+            case "/":
+                response = this.getDivision(request);
+                break;
+            // Modulo
+            case "%":
+                response = this.getModulo(request);
+                break;
+            // Factorial
+            case "!":
+                response = this.getFactorial(request);
+                break;
+            // Prime
+            case "p":
+                response = this.getIsPrime(request);
+                break;
+            // Nth Prime
+            case "np":
+                response = this.getNthPrime(request);
+                break;
+            default:
+                this.HttpContext.response.notImplemented();
+                return;
         }
 
-        // Handle addition
-        if (operator === "+" || operator === " ") {
-            this.setResponse(this.getAddition(request));
-            return;
-        }
-
-        if (operator === "-") {
-            this.setResponse(this.getSubtraction(request));
-            return;
-        }
-
-        if (operator === "*") {
-            this.setResponse(this.getMultiplication(request));
-            return;
-        }
-
-        if (operator === "/") {
-            this.setResponse(this.getDivision(request));
-            return;
-        }
-
-        if (operator === "%") {
-            this.setResponse(this.getModulo(request));
-            return;
-        }
-
-        if (operator === "!") {
-            this.setResponse(this.getFactor(request));
-            return;
-        }
-
-        if (operator === "p") {
-            this.setResponse(this.getPrime(request));
-            return;
-        }
-
-        if (operator === "np") {
-            this.setResponse(this.getNthPrime(request));
-            return;
-        }
-
-        this.HttpContext.response.notImplemented();
+        this.HttpContext.response.JSON(response);
     }
 
     post(data) {
@@ -87,92 +83,89 @@ export default class MathsController extends Controller {
         this.HttpContext.response.notImplemented();
     }
 
-    setResponse(response) {
-        this.HttpContext.response.JSON(response);
-    }
+    #checkBinomial(request, response, first = 'x', second = 'y') {
+        let _first = request.params[first];
 
-    #checkXY(request, response) {
-        let x = request.params['x'];
-
-        // If X not defined
-        if (x === undefined) {
-            response.error = '\'x\' is missing!';
+        // If first not defined
+        if (_first === undefined)
+        {
+            response.error = `'${first}' is missing!`;
             return response;
         }
 
-        // If X NAN
-        x = parseFloat(x);
-        response.x = x;
+        // If first NAN
+        _first = parseFloat(_first);
+        response[first] = _first;
 
-        if (isNaN(x)) {
-            response.error = '\'x\' is not a number.';
-            response.x = request.params['x'];
+        if (isNaN(_first)) {
+            response.error = `'${first}' is not a number.`;
+            response.x = request.params[first];
             return response;
         }
 
-        let y = request.params['y'];
+        let _second = request.params[second];
 
-        // If Y not defined
-        if (y === undefined) {
-            response.error = '\'y\' is missing!';
+        // If second not defined
+        if (_second === undefined)
+        {
+            response.error = `'${second}' is missing!`;
             return response;
         }
 
-        // If Y NAN
-        y = parseFloat(y);
-        response.y = y;
+        // If second NAN
+        _second = parseFloat(_second);
+        response[second] = _second;
 
-        if (isNaN(y)) {
-            response.error = '\'y\' is not a number.';
-            response.y = request.params['y'];
+        if (isNaN(_second)) {
+            response.error = `'${second}' is not a number.`;
+            response.x = request.params[second];
             return response;
         }
 
+        // If too many parameters
         if (Object.keys(request.params).length > 3) {
             response.error = "The request has too many parameters.";
 
             for (const key in request.params)
                 response[key] ||= request.params[key];
-
-            return response;
         }
 
         return response;
     }
 
-    #checkN(request, response) {
-        let n = request.params['n'];
+    #checkMonomial(request, response, name = 'n') {
+
+        let n = request.params[name];
 
         // If N not defined
         if (n === undefined) {
-            response.error = '\'n\' is missing!';
+            response.error = `'${name}' is missing!`;
             return response;
         }
 
         // If N NAN
         n = parseInt(n);
-        response.n = n;
+        response[name] = n;
 
         if (isNaN(n)) {
-            response.error = '\'n\' is not a number.';
-            response.y = request.params['n'];
+            response.error = `'${name}' is not a number.`;
+            response[name] = request.params[name];
             return response;
         }
 
+        // If too many parameters
         if (Object.keys(request.params).length > 2) {
             response.error = "The request has too many parameters.";
 
             for (const key in request.params)
                 response[key] ||= request.params[key];
-
-            return response;
         }
 
         return response;
     }
 
     getAddition(request) {
-        let response = this.#checkXY(request, {'op': '+'});
+        let response = this.#checkBinomial(request, {'op': '+'});
 
         if (response.error === undefined)
             response.value = response.x + response.y;
@@ -180,7 +173,7 @@ export default class MathsController extends Controller {
     }
 
     getSubtraction(request) {
-        let response = this.#checkXY(request, {'op': '-'});
+        let response = this.#checkBinomial(request, {'op': '-'});
 
         if (response.error === undefined)
             response.value = response.x - response.y;
@@ -188,7 +181,7 @@ export default class MathsController extends Controller {
     }
 
     getMultiplication(request) {
-        let response = this.#checkXY(request, {'op': '*'});
+        let response = this.#checkBinomial(request, {'op': '*'});
 
         if (response.error === undefined)
             response.value = response.x * response.y;
@@ -196,7 +189,7 @@ export default class MathsController extends Controller {
     }
 
     getDivision(request) {
-        let response = this.#checkXY(request, {'op': '/'});
+        let response = this.#checkBinomial(request, {'op': '/'});
 
         if (response.error === undefined)
             response.value = response.x / response.y;
@@ -204,15 +197,15 @@ export default class MathsController extends Controller {
     }
 
     getModulo(request) {
-        let response = this.#checkXY(request, {'op': '%'});
+        let response = this.#checkBinomial(request, {'op': '%'});
 
         if (response.error === undefined)
             response.value = response.x % response.y;
         return response;
     }
 
-    getFactor(request) {
-        let response = this.#checkN(request, {'op': '!'});
+    getFactorial(request) {
+        let response = this.#checkMonomial(request, {'op': '!'});
 
         if (response.error !== undefined)
             return response;
@@ -226,8 +219,8 @@ export default class MathsController extends Controller {
         return response;
     }
 
-    getPrime(request) {
-        let response = this.#checkN(request, {'op': 'p'});
+    getIsPrime(request) {
+        let response = this.#checkMonomial(request, {'op': 'p'});
 
         if (response.error !== undefined)
             return response;
@@ -237,7 +230,7 @@ export default class MathsController extends Controller {
     }
 
     getNthPrime(request) {
-        let response = this.#checkN(request, {'op': 'np'});
+        let response = this.#checkMonomial(request, {'op': 'np'});
 
         if (response.error !== undefined)
             return response;
