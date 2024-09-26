@@ -99,7 +99,7 @@ export default class MathsController extends Controller {
 
         if (isNaN(_first)) {
             response.error = `'${first}' is not a number.`;
-            response.x = request.params[first];
+            response[first] = request.params[first];
             return response;
         }
 
@@ -118,7 +118,7 @@ export default class MathsController extends Controller {
 
         if (isNaN(_second)) {
             response.error = `'${second}' is not a number.`;
-            response.x = request.params[second];
+            response[second] = request.params[second];
             return response;
         }
 
