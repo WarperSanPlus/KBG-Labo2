@@ -1,5 +1,7 @@
 import Controller from "./Controller.js";
 import {factorial, findPrime, isPrime} from "../modules/mathUtilities.js";
+import fs from "fs";
+import {handleStaticResourceRequest} from "../staticResourcesServer.js";
 
 export default class MathsController extends Controller {
     constructor(HttpContext) {
@@ -80,15 +82,15 @@ export default class MathsController extends Controller {
 
     // RESPONSES
     getDocumentation() {
-        this.HttpContext.response.notImplemented();
+        this.HttpContext.req.url = "API-Help-Pages/API-Maths-Help.html";
+        handleStaticResourceRequest(this.HttpContext);
     }
 
     #checkBinomial(request, response, first = 'x', second = 'y') {
         let _first = request.params[first];
 
         // If first not defined
-        if (_first === undefined)
-        {
+        if (_first === undefined) {
             response.error = `'${first}' is missing!`;
             return response;
         }
@@ -106,8 +108,7 @@ export default class MathsController extends Controller {
         let _second = request.params[second];
 
         // If second not defined
-        if (_second === undefined)
-        {
+        if (_second === undefined) {
             response.error = `'${second}' is missing!`;
             return response;
         }
