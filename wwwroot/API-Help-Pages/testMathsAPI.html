@@ -169,7 +169,7 @@
         await testAPI(URL, "?op=%&x=100&y=9", 1);
 
         // --- FACTOR ---
-        addNewCategory("FACTOR");
+        addNewCategory("FACTORIAL");
         await testAPI(URL, "?op=!", expectError);
         await testAPI(URL, "?op=!&n=ABC", expectError);
         await testAPI(URL, "?op=!&n=10", 3628800);
