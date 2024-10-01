@@ -1,6 +1,5 @@
 import Controller from "./Controller.js";
 import {factorial, findPrime, isPrime} from "../modules/mathUtilities.js";
-import fs from "fs";
 import {handleStaticResourceRequest} from "../staticResourcesServer.js";
 
 export default class MathsController extends Controller {
@@ -191,6 +190,15 @@ export default class MathsController extends Controller {
 
     getDivision(request) {
         let response = this.#checkBinomial(request, {'op': '/'});
+
+        if (response.error !== undefined)
+            return response;
+
+        if (response.y === 0)
+        {
+            response.error = "'Y' can not be zero.";
+            return response;
+        }
 
         if (response.error === undefined)
             response.value = response.x / response.y;

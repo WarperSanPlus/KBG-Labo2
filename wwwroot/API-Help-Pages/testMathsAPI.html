@@ -152,6 +152,7 @@
         await testAPI(URL, "?op=/&x=1&y=77", 1 / 77);
         await testAPI(URL, "?op=/&x=-1&y=2", -0.5);
         await testAPI(URL, "?op=/&x=-1&y=-100", 0.01);
+        await testAPI(URL, "?op=/&x=1&y=0", expectError);
 
         // --- MODULO ---
         addNewCategory("MODULO");
