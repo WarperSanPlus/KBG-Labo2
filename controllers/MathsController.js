@@ -194,14 +194,12 @@ export default class MathsController extends Controller {
         if (response.error !== undefined)
             return response;
 
-        if (response.y === 0)
-        {
+        if (response.y === 0) {
             response.error = "'Y' can not be zero.";
             return response;
         }
 
-        if (response.error === undefined)
-            response.value = response.x / response.y;
+        response.value = response.x / response.y;
         return response;
     }
 
