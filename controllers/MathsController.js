@@ -195,7 +195,7 @@ export default class MathsController extends Controller {
             return response;
 
         if (response.y === 0) {
-            response.error = "'Y' can not be zero.";
+            response.value = "Infinity";
             return response;
         }
 
